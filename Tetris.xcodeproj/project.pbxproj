@@ -137,7 +137,6 @@
 			children = (
 				5271CAA12743DA9300E4632C /* Controller */,
 				5271CAA02743DA7400E4632C /* Scene */,
-				5271CA5A2743D01E00E4632C /* Sprite */,
 				5271CA592743D01500E4632C /* Model */,
 				5271CA452743CC2C00E4632C /* Support */,
 				5271CA202743CBD000E4632C /* Info.plist */,
@@ -204,13 +203,6 @@
 				528BF8792743DEC9004CB946 /* Array2D.swift */,
 			);
 			path = Model;
-			sourceTree = "<group>";
-		};
-		5271CA5A2743D01E00E4632C /* Sprite */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Sprite;
 			sourceTree = "<group>";
 		};
 		5271CAA02743DA7400E4632C /* Scene */ = {
