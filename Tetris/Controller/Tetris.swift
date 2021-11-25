@@ -25,19 +25,19 @@ let PointsPerLine = 10
 /// 关卡升级阈值
 let LevelThreshold = 100
 
-///. Swiftris代理
-protocol SwiftrisDelegate {
+/// Tetris代理
+protocol TetrisDelegate {
     /// 游戏开始
-    func gameDidBegin(swiftris: Swiftris)
+    func gameDidBegin(tetris: Tetris)
     /// 游戏结束
-    func gameDidEnd(swiftris: Swiftris)
-    func gameShapeDidLand(swiftris: Swiftris)
-    func gameShapeDidMove(swiftris: Swiftris)
-    func gameShapeDidDrop(swiftris: Swiftris)
-    func gameDidLevelUp(swiftris: Swiftris)
+    func gameDidEnd(tetris: Tetris)
+    func gameShapeDidLand(tetris: Tetris)
+    func gameShapeDidMove(tetris: Tetris)
+    func gameShapeDidDrop(tetris: Tetris)
+    func gameDidLevelUp(tetris: Tetris)
 }
 
-class Swiftris {
+class Tetris {
     /// 形状块数据
     var blockArray: Array2D<Block>
     /// 下一个形状
@@ -45,7 +45,7 @@ class Swiftris {
     /// 正在下落的形状
     var fallingShape: Shape?
     /// 代理
-    var delegate: SwiftrisDelegate?
+    var delegate: TetrisDelegate?
     /// 分数
     var score = 0
     /// 等级(等级越高,下落速度越快)
@@ -63,7 +63,7 @@ class Swiftris {
         if nextShape == nil {
             nextShape = Shape.random(startingColumn: PreviewColumn, startingRow: PreviewRow)
         }
-        delegate?.gameDidBegin(swiftris: self)
+        delegate?.gameDidBegin(tetris: self)
     }
     
     func newShape() -> (fallingShape: Shape?, nextShape: Shape?) {
@@ -108,7 +108,7 @@ class Swiftris {
         }
         
         shape.raiseShapeByOneRow()
-        delegate?.gameShapeDidDrop(swiftris: self)
+        delegate?.gameShapeDidDrop(tetris: self)
     }
     
     func letShapeFall() {
@@ -125,7 +125,7 @@ class Swiftris {
                 settleShape()
             }
         } else {
-            delegate?.gameShapeDidMove(swiftris: self)
+            delegate?.gameShapeDidMove(tetris: self)
             
             if detectTouch() {
                 settleShape()
@@ -145,7 +145,7 @@ class Swiftris {
             return
         }
         
-        delegate?.gameShapeDidMove(swiftris: self)
+        delegate?.gameShapeDidMove(tetris: self)
     }
     
     func moveShapeLeft() {
@@ -158,7 +158,7 @@ class Swiftris {
             shape.shiftRightByOneColumn()
             return
         }
-        delegate?.gameShapeDidMove(swiftris: self)
+        delegate?.gameShapeDidMove(tetris: self)
     }
     
     func moveShapeRight() {
@@ -172,7 +172,7 @@ class Swiftris {
             shape.shiftLeftByOneColumn()
             return
         }
-        delegate?.gameShapeDidMove(swiftris: self)
+        delegate?.gameShapeDidMove(tetris: self)
     }
     
     func settleShape() {
@@ -185,7 +185,7 @@ class Swiftris {
         }
         
         fallingShape = nil
-        delegate?.gameShapeDidLand(swiftris: self)
+        delegate?.gameShapeDidLand(tetris: self)
     }
     
     func detectTouch() -> Bool {
@@ -205,7 +205,7 @@ class Swiftris {
     func endGame() {
         score = 0
         level = 1
-        delegate?.gameDidEnd(swiftris: self)
+        delegate?.gameDidEnd(tetris: self)
     }
     
     func removeCompleteLines() -> (linesRemoved: Array<Array<Block>>, fallenBlocks: Array<Array<Block>>) {
@@ -239,7 +239,7 @@ class Swiftris {
         
         if score >= level * LevelThreshold {
             level += 1
-            delegate?.gameDidLevelUp(swiftris: self)
+            delegate?.gameDidLevelUp(tetris: self)
         }
         
         var fallenBlocks = Array<Array<Block>>()

@@ -5,58 +5,58 @@
 //  Created by John Lee on 2021/11/16.
 //
 
-import UIKit
-import SpriteKit
 import GameplayKit
+import SpriteKit
+import UIKit
 
-class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognizerDelegate  {
+class GameViewController: UIViewController, TetrisDelegate, UIGestureRecognizerDelegate {
     var scene: GameScene!
-    var swiftris: Swiftris!
+    var tetris: Tetris!
     var panPointReference: CGPoint?
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let skview = self.view as! SKView
+        let skview = view as! SKView
         scene = GameScene(size: skview.bounds.size)
         scene.scaleMode = .aspectFill
         scene.tick = didTick
-        
+
         skview.ignoresSiblingOrder = false
         skview.showsFPS = true
         skview.showsNodeCount = true
         skview.isMultipleTouchEnabled = true
-        
-        swiftris = Swiftris()
-        swiftris.delegate = self
-        swiftris.beginGame()
-        
+
+        tetris = Tetris()
+        tetris.delegate = self
+        tetris.beginGame()
+
         // Present the scene
         skview.presentScene(scene)
-        
+
         // Gesture observer
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(self.handlePan(_:)))
-        self.view.addGestureRecognizer(pan)
-        
-        let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTap(_:)))
-        self.view.addGestureRecognizer(tap)
-        
-        let swipe = UISwipeGestureRecognizer(target: self, action: #selector(self.handleSwipe(_:)))
-        self.view.addGestureRecognizer(swipe)
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+        view.addGestureRecognizer(pan)
+
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+        view.addGestureRecognizer(tap)
+
+        let swipe = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
+        view.addGestureRecognizer(swipe)
     }
-    
+
     func didTick() {
-        swiftris.letShapeFall()
+        tetris.letShapeFall()
     }
-    
+
     func nextShape() {
-        let newShapes = swiftris.newShape()
+        let newShapes = tetris.newShape()
         guard let fallingShape = newShapes.fallingShape else {
             return
         }
-        
-        self.scene.addPreviewShapeToScene(shape: newShapes.nextShape!) {}
-        self.scene.movePreviewShape(shape: fallingShape) {
+
+        scene.addPreviewShapeToScene(shape: newShapes.nextShape!) {}
+        scene.movePreviewShape(shape: fallingShape) {
             self.view.isUserInteractionEnabled = true
             self.scene.startTicking()
         }
@@ -65,10 +65,10 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
     override var shouldAutorotate: Bool {
         return true
     }
-    
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        swiftris.endGame()
+        tetris.endGame()
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
@@ -82,12 +82,13 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
     override var prefersStatusBarHidden: Bool {
         return true
     }
-    
+
     // MARK: - gestures
+
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         true
     }
-    
+
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         if gestureRecognizer is UISwipeGestureRecognizer {
             if otherGestureRecognizer is UIPanGestureRecognizer {
@@ -100,16 +101,16 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
         }
         return false
     }
-    
+
     @objc func handlePan(_ sender: UIPanGestureRecognizer) {
-        let currentPoint = sender.translation(in: self.view)
+        let currentPoint = sender.translation(in: view)
         if let originalPoint = panPointReference {
             if abs(currentPoint.x - originalPoint.x) > (BlockSize * 0.9) {
-                if sender.velocity(in: self.view).x > CGFloat(0) {
-                    swiftris.moveShapeRight()
+                if sender.velocity(in: view).x > CGFloat(0) {
+                    tetris.moveShapeRight()
                     panPointReference = currentPoint
                 } else {
-                    swiftris.moveShapeLeft()
+                    tetris.moveShapeLeft()
                     panPointReference = currentPoint
                 }
             }
@@ -117,67 +118,67 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
             panPointReference = currentPoint
         }
     }
-    
+
     @objc func handleTap(_ sender: UITapGestureRecognizer) {
-        swiftris.rotateShape()
+        tetris.rotateShape()
     }
-    
+
     @objc func handleSwipe(_ sender: UISwipeGestureRecognizer) {
-        swiftris.dropShape()
+        tetris.dropShape()
     }
-    
-    
-    // MARK: - Swiftris delegate methods
-    func gameDidBegin(swiftris: Swiftris) {
+
+    // MARK: - Tetris delegate methods
+
+    func gameDidBegin(tetris: Tetris) {
         scene.tickLengthMillis = TickLengthLevelOne
-        
+
         // The following is false when restarting a new game
-        if swiftris.nextShape != nil && swiftris.nextShape!.blocks[0].sprite == nil {
-            scene.addPreviewShapeToScene(shape: swiftris.nextShape!) {
+        if tetris.nextShape != nil && tetris.nextShape!.blocks[0].sprite == nil {
+            scene.addPreviewShapeToScene(shape: tetris.nextShape!) {
                 self.nextShape()
             }
         } else {
             nextShape()
         }
     }
-    
-    func gameDidEnd(swiftris: Swiftris) {
-        self.view.isUserInteractionEnabled = false
+
+    func gameDidEnd(tetris: Tetris) {
+        view.isUserInteractionEnabled = false
         scene.stopTicking()
         scene.playSound(sound: Sound.gameover.fileName)
-        scene.animateCollapsingLines(linesToRemove: swiftris.removeAllBlocks(), fallenBlocks: swiftris.removeAllBlocks()) {
-            swiftris.beginGame()
+        scene.animateCollapsingLines(linesToRemove: tetris.removeAllBlocks(), fallenBlocks: tetris.removeAllBlocks()) {
+            tetris.beginGame()
         }
     }
-    
-    func gameShapeDidLand(swiftris: Swiftris) {
+
+    func gameShapeDidLand(tetris: Tetris) {
         scene.stopTicking()
-        self.view.isUserInteractionEnabled = false
-        let removedLines = swiftris.removeCompleteLines()
+        view.isUserInteractionEnabled = false
+        let removedLines = tetris.removeCompleteLines()
         if removedLines.linesRemoved.count > 0 {
             scene.animateCollapsingLines(linesToRemove: removedLines.linesRemoved, fallenBlocks: removedLines.fallenBlocks) {
                 // #11
-                self.gameShapeDidLand(swiftris: swiftris)
+                self.gameShapeDidLand(tetris: tetris)
             }
             scene.playSound(sound: Sound.bomb.fileName)
         } else {
             nextShape()
         }
     }
-    
-    func gameShapeDidMove(swiftris: Swiftris) {
-        scene.redrawShape(shape: swiftris.fallingShape!) {}
+
+    func gameShapeDidMove(tetris: Tetris) {
+        scene.redrawShape(shape: tetris.fallingShape!) {}
     }
-    
-    func gameShapeDidDrop(swiftris: Swiftris) {
+
+    func gameShapeDidDrop(tetris: Tetris) {
         scene.stopTicking()
-        scene.redrawShape(shape: swiftris.fallingShape!) {
-            swiftris.letShapeFall()
+        scene.redrawShape(shape: tetris.fallingShape!) {
+            tetris.letShapeFall()
         }
         scene.playSound(sound: Sound.drop.fileName)
     }
-    
-    func gameDidLevelUp(swiftris: Swiftris) {
+
+    func gameDidLevelUp(tetris: Tetris) {
         if scene.tickLengthMillis >= 100 {
             scene.tickLengthMillis -= 100
         } else if scene.tickLengthMillis > 50 {
