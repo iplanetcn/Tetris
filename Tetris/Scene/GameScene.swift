@@ -27,6 +27,10 @@ class GameScene: SKScene {
     let LayerPosition = CGPoint(x: 6, y: -6)
     /// 材质图片缓存
     var textureCache = Dictionary<String, SKTexture>()
+    /// 分数
+    let scoreLabel = SKLabelNode()
+    /// 级别(关卡)
+    let levelLabel = SKLabelNode()
     
     /// 必要初始化(用以实现反序列化) Called when a node is initialized from an .sks file.
     required init(coder aDecoder: NSCoder) {
@@ -57,6 +61,28 @@ class GameScene: SKScene {
         shapeLayer.addChild(gameBoard)
         
         gameLayer.addChild(shapeLayer)
+        
+        
+        // 游戏分数
+        let uiLayer = SKNode()
+        uiLayer.position = CGPoint(x: gameBoard.position.x + gameBoard.calculateAccumulatedFrame().width + 40, y: gameBoard.position.y - 150)
+        addChild(uiLayer)
+        
+        scoreLabel.text = "score: 0"
+        scoreLabel.fontName = "AvenirNext-Bold"
+        scoreLabel.fontColor = .white
+        scoreLabel.fontSize = 20
+        scoreLabel.position = CGPoint(x: 0, y: 0)
+        scoreLabel.horizontalAlignmentMode = .left
+        uiLayer.addChild(scoreLabel)
+        
+        levelLabel.text = "level: 1"
+        levelLabel.fontName = "AvenirNext-Bold"
+        levelLabel.fontColor = .white
+        levelLabel.fontSize = 20
+        levelLabel.position = CGPoint(x: 0, y: -48)
+        levelLabel.horizontalAlignmentMode = .left
+        uiLayer.addChild(levelLabel)
         
         // 播放背景音乐
         Audio.sharedInstance.playSound(soundFileName: Sound.theme.fileName)
@@ -101,7 +127,7 @@ class GameScene: SKScene {
     func pointForColumn(column: Int, row: Int) -> CGPoint {
         let x = LayerPosition.x + (CGFloat(column) * BlockSize) + (BlockSize / 2)
         let y = LayerPosition.y - ((CGFloat(row) * BlockSize) + (BlockSize / 2))
-    
+        
         return CGPoint(x: x, y: y)
     }
     
@@ -196,8 +222,8 @@ class GameScene: SKScene {
                 moveAction.timingMode = .easeOut
                 sprite.run(
                     SKAction.sequence([
-                                        SKAction.wait(forDuration: delay),
-                                        moveAction]))
+                        SKAction.wait(forDuration: delay),
+                        moveAction]))
                 longestDuration = max(longestDuration, duration + delay)
             }
         }
@@ -233,5 +259,13 @@ class GameScene: SKScene {
         }
         // #7
         run(SKAction.wait(forDuration: longestDuration), completion: completion)
+    }
+    
+    func updateScoreDisplay(_ score: Int) {
+        scoreLabel.text = "score: \(score)"
+    }
+    
+    func updateLevelDisplay(_ level: Int) {
+        levelLabel.text = "level: \(level)"
     }
 }

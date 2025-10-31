@@ -35,14 +35,16 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
         skview.presentScene(scene)
         
         // Gesture observer
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(self.handlePan(_:)))
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
         self.view.addGestureRecognizer(pan)
         
-        let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTap(_:)))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         self.view.addGestureRecognizer(tap)
         
-        let swipe = UISwipeGestureRecognizer(target: self, action: #selector(self.handleSwipe(_:)))
-        self.view.addGestureRecognizer(swipe)
+        let swipeDown = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeDown))
+        swipeDown.direction = .down
+        swipeDown.delegate = self
+        self.view.addGestureRecognizer(swipeDown)
     }
     
     func didTick() {
@@ -122,8 +124,10 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
         swiftris.rotateShape()
     }
     
-    @objc func handleSwipe(_ sender: UISwipeGestureRecognizer) {
-        swiftris.dropShape()
+    @objc func handleSwipeDown(_ sender: UISwipeGestureRecognizer) {
+        if sender.direction == .down {
+            swiftris.dropShape()
+        }
     }
     
     
@@ -184,5 +188,27 @@ class GameViewController: UIViewController, SwiftrisDelegate, UIGestureRecognize
             scene.tickLengthMillis -= 50
         }
         scene.playSound(sound: Sound.levelup.fileName)
+    }
+    
+    func gameDidUpdateScore(swiftris: Swiftris) {
+        let score = swiftris.score
+        scene.updateScoreDisplay(score)
+    }
+    
+    func gameDidUpdateLevel(swiftris: Swiftris) {
+        let level = swiftris.level
+        scene.updateLevelDisplay(level)
+    }
+    
+    // MARK: - update layout after size changed
+    override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
+        // 横竖屏适配
+        if size.width > size.height {
+            // 横屏
+            
+        } else {
+            // 竖屏
+            
+        }
     }
 }

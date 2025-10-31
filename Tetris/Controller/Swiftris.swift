@@ -35,6 +35,8 @@ protocol SwiftrisDelegate {
     func gameShapeDidMove(swiftris: Swiftris)
     func gameShapeDidDrop(swiftris: Swiftris)
     func gameDidLevelUp(swiftris: Swiftris)
+    func gameDidUpdateScore(swiftris: Swiftris)
+    func gameDidUpdateLevel(swiftris: Swiftris)
 }
 
 class Swiftris {
@@ -47,9 +49,17 @@ class Swiftris {
     /// 代理
     var delegate: SwiftrisDelegate?
     /// 分数
-    var score = 0
+    var score = 0 {
+        didSet {
+            self.delegate?.gameDidUpdateScore(swiftris: self)
+        }
+    }
     /// 等级(等级越高,下落速度越快)
-    var level = 1
+    var level = 1 {
+        didSet {
+            self.delegate?.gameDidUpdateLevel(swiftris: self)
+        }
+    }
     
     init() {
         fallingShape = nil
